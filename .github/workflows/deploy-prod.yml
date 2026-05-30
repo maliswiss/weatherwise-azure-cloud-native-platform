@@ -17,7 +17,7 @@ concurrency:
 
 env:
   AZURE_RESOURCE_GROUP: weatherwise-prod-rg
-  AZURE_LOCATION: westeurope
+  AZURE_LOCATION: switzerlandnorth
   ENVIRONMENT_NAME: prod
   ACR_NAME: weatherwiseacrprod2026
   CONTAINER_APP_ENV: weatherwise-env-prod
