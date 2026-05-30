@@ -6,7 +6,7 @@
       "value": "prod"
     },
     "location": {
-      "value": "westeurope"
+      "value": "switzerlandnorth"
     },
     "projectPrefix": {
       "value": "weatherwise"
@@ -37,6 +37,9 @@
     },
     "maxReplicas": {
       "value": 3
+    },
+    "existingContainerAppEnvId": {
+      "value": "/subscriptions/47318429-b5ae-4f0a-ac10-7c569804c3f2/resourceGroups/weatherwise-dev-rg/providers/Microsoft.App/managedEnvironments/weatherwise-env-dev"
     }
   }
 }

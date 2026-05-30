@@ -1,18 +1,9 @@
 // =============================================================================
 // WeatherWise - Hauptkonfiguration (Bicep IaC)
 // =============================================================================
-// Erfüllt Bewertungskriterien:
-//   - K3 (Secrets): Azure Key Vault Integration
-//   - K4 (Deployment): Azure Container Apps mit HTTPS + Healthchecks
-//   - K8 (Security): Managed Identity, Non-Root, Key Vault
-//   - K10 (Komplexität): Infrastructure as Code
-// =============================================================================
 
 targetScope = 'resourceGroup'
 
-// -----------------------------------------------------------------------------
-// Parameter
-// -----------------------------------------------------------------------------
 @description('Umgebungs-Name: dev oder prod')
 @allowed(['dev', 'prod'])
 param environmentName string
@@ -54,6 +45,9 @@ param minReplicas int = 1
 @description('Maximale Anzahl Replikate')
 param maxReplicas int = 3
 
+@description('Bestehende Container App Environment ID (leer = neue erstellen)')
+param existingContainerAppEnvId string = ''
+
 // -----------------------------------------------------------------------------
 // Variablen
 // -----------------------------------------------------------------------------
@@ -74,7 +68,7 @@ var frontendAppName = '${projectPrefix}-frontend-${environmentName}'
 var redisAppName = '${projectPrefix}-redis-${environmentName}'
 
 // -----------------------------------------------------------------------------
-// Module: Log Analytics + Application Insights (Monitoring)
+// Module: Log Analytics + Application Insights
 // -----------------------------------------------------------------------------
 module logAnalytics 'modules/log-analytics.bicep' = {
   name: 'deploy-log-analytics'
@@ -87,7 +81,7 @@ module logAnalytics 'modules/log-analytics.bicep' = {
 }
 
 // -----------------------------------------------------------------------------
-// Module: Key Vault (Secrets)
+// Module: Key Vault
 // -----------------------------------------------------------------------------
 module keyVault 'modules/key-vault.bicep' = {
   name: 'deploy-key-vault'
@@ -100,7 +94,7 @@ module keyVault 'modules/key-vault.bicep' = {
 }
 
 // -----------------------------------------------------------------------------
-// Module: Container Apps Environment + 3 Apps (Backend, Frontend, Redis)
+// Module: Container Apps
 // -----------------------------------------------------------------------------
 module containerApps 'modules/container-apps.bicep' = {
   name: 'deploy-container-apps'
@@ -126,26 +120,16 @@ module containerApps 'modules/container-apps.bicep' = {
     logAnalyticsCustomerId: logAnalytics.outputs.customerId
     logAnalyticsSharedKey: logAnalytics.outputs.primarySharedKey
     appInsightsConnectionString: logAnalytics.outputs.appInsightsConnectionString
+    existingContainerAppEnvId: existingContainerAppEnvId
   }
 }
 
 // -----------------------------------------------------------------------------
 // Outputs
 // -----------------------------------------------------------------------------
-@description('FQDN des Frontends (mit HTTPS)')
 output frontendUrl string = 'https://${containerApps.outputs.frontendFqdn}'
-
-@description('FQDN des Backends (mit HTTPS)')
 output backendUrl string = 'https://${containerApps.outputs.backendFqdn}'
-
-@description('Name des Key Vaults')
 output keyVaultName string = keyVault.outputs.keyVaultName
-
-@description('Name der Container Apps Environment')
 output containerAppEnvName string = containerAppEnvName
-
-@description('Backend Container App Name')
 output backendAppName string = backendAppName
-
-@description('Frontend Container App Name')
 output frontendAppName string = frontendAppName

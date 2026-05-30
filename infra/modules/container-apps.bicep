@@ -73,6 +73,9 @@ param logAnalyticsSharedKey string
 @description('Application Insights Connection String')
 param appInsightsConnectionString string
 
+@description('Bestehende Container App Environment ID (leer = neue erstellen)')
+param existingContainerAppEnvId string = ''
+
 // -----------------------------------------------------------------------------
 // Existing Resources
 // -----------------------------------------------------------------------------
@@ -85,9 +88,9 @@ resource keyVault 'Microsoft.KeyVault/vaults@2024-11-01' existing = {
 }
 
 // -----------------------------------------------------------------------------
-// Container Apps Environment
+// Container Apps Environment (nur erstellen wenn keine existierende ID übergeben)
 // -----------------------------------------------------------------------------
-resource containerAppEnv 'Microsoft.App/managedEnvironments@2024-03-01' = {
+resource containerAppEnv 'Microsoft.App/managedEnvironments@2024-03-01' = if (empty(existingContainerAppEnvId)) {
   name: containerAppEnvName
   location: location
   tags: tags
@@ -99,7 +102,7 @@ resource containerAppEnv 'Microsoft.App/managedEnvironments@2024-03-01' = {
         sharedKey: logAnalyticsSharedKey
       }
     }
-    zoneRedundant: false  // Single-Zone für Kostenoptimierung
+    zoneRedundant: false
     workloadProfiles: [
       {
         name: 'Consumption'
@@ -108,6 +111,8 @@ resource containerAppEnv 'Microsoft.App/managedEnvironments@2024-03-01' = {
     ]
   }
 }
+
+var resolvedEnvId = empty(existingContainerAppEnvId) ? containerAppEnv.id : existingContainerAppEnvId
 
 // -----------------------------------------------------------------------------
 // Managed Identity für Backend (Key Vault Zugriff)
@@ -127,7 +132,6 @@ resource keyVaultSecretsUserRole 'Microsoft.Authorization/roleAssignments@2022-0
   properties: {
     principalId: backendIdentity.properties.principalId
     principalType: 'ServicePrincipal'
-    // Built-in Rolle "Key Vault Secrets User"
     roleDefinitionId: subscriptionResourceId(
       'Microsoft.Authorization/roleDefinitions',
       '4633458b-17de-408a-b874-0445c86b69e6'
@@ -144,7 +148,6 @@ resource acrPullRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   properties: {
     principalId: backendIdentity.properties.principalId
     principalType: 'ServicePrincipal'
-    // Built-in Rolle "AcrPull"
     roleDefinitionId: subscriptionResourceId(
       'Microsoft.Authorization/roleDefinitions',
       '7f951dda-4ed3-4680-a7ca-43fe172d538d'
@@ -153,18 +156,18 @@ resource acrPullRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
 }
 
 // -----------------------------------------------------------------------------
-// Redis - Internal Service (nicht von außen erreichbar)
+// Redis
 // -----------------------------------------------------------------------------
 resource redisApp 'Microsoft.App/containerApps@2024-03-01' = {
   name: redisAppName
   location: location
   tags: tags
   properties: {
-    managedEnvironmentId: containerAppEnv.id
+    managedEnvironmentId: resolvedEnvId
     configuration: {
       activeRevisionsMode: 'Single'
       ingress: {
-        external: false  // NUR intern erreichbar
+        external: false
         targetPort: 6379
         exposedPort: 6379
         transport: 'tcp'
@@ -191,7 +194,7 @@ resource redisApp 'Microsoft.App/containerApps@2024-03-01' = {
       ]
       scale: {
         minReplicas: 1
-        maxReplicas: 1  // Redis: Single Instance (kein Clustering)
+        maxReplicas: 1
       }
     }
   }
@@ -215,14 +218,14 @@ resource backendApp 'Microsoft.App/containerApps@2024-03-01' = {
     acrPullRole
   ]
   properties: {
-    managedEnvironmentId: containerAppEnv.id
+    managedEnvironmentId: resolvedEnvId
     configuration: {
       activeRevisionsMode: 'Single'
       ingress: {
         external: true
         targetPort: 8000
         transport: 'http'
-        allowInsecure: false  // HTTPS only
+        allowInsecure: false
         traffic: [
           {
             latestRevision: true
@@ -230,7 +233,7 @@ resource backendApp 'Microsoft.App/containerApps@2024-03-01' = {
           }
         ]
         corsPolicy: {
-          allowedOrigins: ['*']  // Frontend URL wird vom Backend selbst gefiltert
+          allowedOrigins: ['*']
           allowedMethods: ['GET']
           allowedHeaders: ['*']
         }
@@ -357,14 +360,14 @@ resource frontendApp 'Microsoft.App/containerApps@2024-03-01' = {
     backendApp
   ]
   properties: {
-    managedEnvironmentId: containerAppEnv.id
+    managedEnvironmentId: resolvedEnvId
     configuration: {
       activeRevisionsMode: 'Single'
       ingress: {
         external: true
         targetPort: 8080
         transport: 'http'
-        allowInsecure: false  // HTTPS only
+        allowInsecure: false
         traffic: [
           {
             latestRevision: true
@@ -431,7 +434,7 @@ resource frontendApp 'Microsoft.App/containerApps@2024-03-01' = {
 // -----------------------------------------------------------------------------
 // Outputs
 // -----------------------------------------------------------------------------
-output containerAppEnvId string = containerAppEnv.id
+output containerAppEnvId string = resolvedEnvId
 output backendFqdn string = backendApp.properties.configuration.ingress.fqdn
 output frontendFqdn string = frontendApp.properties.configuration.ingress.fqdn
 output redisFqdn string = redisApp.properties.configuration.ingress.fqdn
