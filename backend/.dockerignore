@@ -1,0 +1,32 @@
+# Geheimnisse - NIE in das Image
+.env
+.env.*
+!.env.example
+
+# Python-Artefakte
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtuelle Environments (werden im Builder neu aufgebaut)
+venv/
+.venv/
+env/
+
+# Editor & OS
+.vscode/
+.idea/
+.DS_Store
+*.swp
+
+# Tests & Dokumentation (nicht ins Runtime-Image)
+tests/
+docs/
+*.md
+!app/**/*.md

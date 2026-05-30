@@ -1,0 +1,50 @@
+# =============================================================================
+# Git Attributes - Line Endings konsistent halten
+# =============================================================================
+# Auf Windows-Maschinen ist CRLF Standard, auf Linux LF.
+# CI/CD läuft auf Linux - daher erzwingen wir LF für alle Code-Dateien.
+# =============================================================================
+
+# Auto-detect text files and normalize line endings
+* text=auto eol=lf
+
+# Source code - immer LF
+*.py    text eol=lf
+*.ts    text eol=lf
+*.tsx   text eol=lf
+*.js    text eol=lf
+*.jsx   text eol=lf
+*.json  text eol=lf
+*.html  text eol=lf
+*.css   text eol=lf
+*.md    text eol=lf
+*.yml   text eol=lf
+*.yaml  text eol=lf
+*.sh    text eol=lf
+*.bicep text eol=lf
+*.conf  text eol=lf
+*.toml  text eol=lf
+
+# Dockerfiles
+Dockerfile          text eol=lf
+.dockerignore       text eol=lf
+docker-compose.yml  text eol=lf
+
+# Environment-Vorlagen
+.env.example        text eol=lf
+.gitignore          text eol=lf
+.gitattributes      text eol=lf
+
+# PowerShell-Skripte - CRLF (Windows-spezifisch)
+*.ps1   text eol=crlf
+
+# Binäre Dateien
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.svg   text eol=lf
+*.woff  binary
+*.woff2 binary
+*.zip   binary

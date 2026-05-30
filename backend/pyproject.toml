@@ -1,0 +1,104 @@
+[project]
+name = "weatherwise-backend"
+version = "1.0.0"
+description = "FastAPI-Proxy für OpenWeatherMap mit Redis-Cache"
+authors = [{name = "Mehmet Ali Gür"}]
+requires-python = ">=3.12"
+
+# =============================================================================
+# Ruff - Industriestandard für Python-Linting und Formatierung
+# Konfiguration orientiert sich an Best Practices der Python-Community.
+# =============================================================================
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+exclude = [
+    ".venv",
+    "venv",
+    "__pycache__",
+    ".git",
+    ".pytest_cache",
+    ".ruff_cache",
+    ".mypy_cache",
+]
+
+[tool.ruff.lint]
+# Aktivierte Regelfamilien
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes (unused imports, undefined names)
+    "I",   # isort (Import-Sortierung)
+    "B",   # flake8-bugbear (likely bugs)
+    "UP",  # pyupgrade (moderne Python-Syntax)
+]
+# Bewusste Ausnahmen mit Begründung
+ignore = [
+    "E501",  # Line too long - wird vom Formatter behandelt
+    "B008",  # Function call in default argument - FastAPI Depends-Pattern
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests dürfen lockerer sein
+"tests/*" = [
+    "S101",  # asserts sind in Tests erwünscht
+    "E402",  # Module-Level-Imports nach Code (für Test-Setup nötig)
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"
+
+# =============================================================================
+# Pytest - Test-Runner Konfiguration
+# =============================================================================
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+addopts = [
+    "-v",
+    "--strict-markers",
+    "--tb=short",
+    "--cov=app",
+    "--cov-report=term-missing",
+    "--cov-report=xml",
+]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]
+
+# =============================================================================
+# Coverage - Code-Coverage-Konfiguration
+# =============================================================================
+[tool.coverage.run]
+source = ["app"]
+omit = [
+    "tests/*",
+    "*/__init__.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+]
+
+# =============================================================================
+# Mypy - Statische Typprüfung
+# =============================================================================
+[tool.mypy]
+python_version = "3.12"
+strict = false
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true

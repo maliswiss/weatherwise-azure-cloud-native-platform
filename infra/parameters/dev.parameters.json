@@ -1,0 +1,42 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environmentName": {
+      "value": "dev"
+    },
+    "location": {
+      "value": "switzerlandnorth"
+    },
+    "projectPrefix": {
+      "value": "weatherwise"
+    },
+    "acrName": {
+      "value": "weatherwiseacrdev2026"
+    },
+    "backendImageTag": {
+      "value": "latest"
+    },
+    "frontendImageTag": {
+      "value": "latest"
+    },
+    "backendCpu": {
+      "value": "0.5"
+    },
+    "backendMemory": {
+      "value": "1Gi"
+    },
+    "frontendCpu": {
+      "value": "0.25"
+    },
+    "frontendMemory": {
+      "value": "0.5Gi"
+    },
+    "minReplicas": {
+      "value": 0
+    },
+    "maxReplicas": {
+      "value": 2
+    }
+  }
+}

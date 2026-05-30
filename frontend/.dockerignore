@@ -1,0 +1,25 @@
+# Geheimnisse
+.env
+.env.*
+!.env.example
+
+# Build-Output (wird im Builder neu erstellt)
+dist/
+dist-ssr/
+
+# Dependencies
+node_modules/
+
+# Editor & OS
+.vscode/
+.idea/
+.DS_Store
+*.swp
+
+# Logs
+*.log
+npm-debug.log*
+
+# Git
+.git/
+.gitignore
