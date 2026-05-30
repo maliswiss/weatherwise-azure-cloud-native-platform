@@ -65,7 +65,7 @@ var tags = {
   module: 'HF Informatik - LB2 Deployment'
 }
 
-var keyVaultName = '${projectPrefix}-kv-${environmentName}-${uniqueString(resourceGroup().id)}'
+var keyVaultName = 'wwkv${environmentName}${take(uniqueString(resourceGroup().id), 10)}'
 var logAnalyticsName = '${projectPrefix}-logs-${environmentName}'
 var appInsightsName = '${projectPrefix}-insights-${environmentName}'
 var containerAppEnvName = '${projectPrefix}-env-${environmentName}'
