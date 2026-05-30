@@ -228,7 +228,7 @@ az containerapp revision restart `
 
 | Problem | Lösung |
 |---------|--------|
-| `az login` fragt nach Subscription | `az account set --subscription "Azure for Students"` |
+| `az login` fragt nach Subscription | `az account set --subscription "Azure subscription 1"` |
 | ACR-Push schlägt fehl | RBAC-Rolle "AcrPush" auf SP prüfen |
 | Key Vault Zugriff verweigert | RBAC-Rolle "Key Vault Secrets User" auf Managed Identity prüfen |
 | Bicep What-If zeigt "unchanged" | Image-Tag in Parametern erhöhen (`v1.0.1` statt `latest`) |
@@ -290,4 +290,13 @@ az consumption budget create `
 | **Total** | **~16 CHF** | **~26 CHF** |
 | **Beide Umgebungen** | | **~42 CHF / Monat** |
 
-$100 Azure-for-Students-Credit reicht somit für **ca. 2,5 Monate** Betrieb.
+Azure-Credit reicht für mehrere Monate Betrieb.
+
+---
+
+<div align="center">
+
+**Mehmet Ali Gür – HF Informatik**
+**Mai 2026**
+
+</div>

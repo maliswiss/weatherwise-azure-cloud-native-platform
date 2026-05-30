@@ -6,7 +6,6 @@ Eine kurze Begründung der wichtigsten technischen Entscheidungen.
 
 ## ADR-001: Backend als Proxy statt direkter Frontend-Call
 
-**Status:** akzeptiert · 25.05.2026
 
 ### Kontext
 
@@ -29,7 +28,7 @@ Environment-Variable gehalten, die aus **Azure Key Vault** über
 **Managed Identity** geladen wird. Der Key erreicht den Browser zu keinem
 Zeitpunkt.
 
-### Bonus
+### Zusätzliche Vorteile
 
 Das Backend kann zusätzlich **Caching** mit Redis machen (TTL 10 min). Das
 schützt das OpenWeatherMap-Rate-Limit und beschleunigt wiederholte Abfragen
@@ -48,7 +47,6 @@ auf < 10 ms.
 
 ## ADR-002: Azure Container Apps statt AKS
 
-**Status:** akzeptiert · 25.05.2026
 
 ### Kontext
 
@@ -71,8 +69,8 @@ Kubernetes. Innerhalb Azure stehen mehrere Optionen zur Verfügung.
 | Kriterium | ACA | AKS |
 |-----------|-----|-----|
 | Setup-Zeit | 1-2 Stunden | 1-2 Tage |
-| Control-Plane-Kosten | 0 €/Monat | ca. 70 €/Monat |
-| Geeignet für $100 Student-Credit | ✓ | × (verbrennt schnell) |
+| Control-Plane-Kosten | 0 CHF/Monat | ca. 70 CHF/Monat |
+| Geeignet für kleine Projekte | ✓ | × (hohe Betriebskosten) |
 | Probes (Liveness/Readiness/Startup) | ✓ | ✓ |
 | Rolling Update | automatisch | konfigurierbar |
 | HTTPS automatisch | ✓ | manuell (Ingress + cert-manager) |
@@ -97,7 +95,6 @@ Overhead einer eigenen Cluster-Verwaltung.
 
 ## ADR-003: Bicep statt Terraform
 
-**Status:** akzeptiert · 25.05.2026
 
 ### Kontext
 
@@ -132,7 +129,6 @@ Infrastructure as Code ist eine der "erweiterten Anforderungen" der Aufgabe.
 
 ## ADR-004: Managed Identity statt Service Principal
 
-**Status:** akzeptiert · 25.05.2026
 
 ### Kontext
 
@@ -174,7 +170,6 @@ Für lokale Entwicklung wird die `.env`-Datei genutzt (siehe `.env.example`).
 
 ## ADR-005: GitHub Actions statt GitLab CI
 
-**Status:** akzeptiert · 25.05.2026
 
 ### Kontext
 
@@ -209,7 +204,6 @@ GitLab CI wäre ebenfalls möglich, GIBB nutzt es intern. Aber:
 
 ## ADR-006: Multi-Stage Dockerfile + Non-Root + Alpine
 
-**Status:** akzeptiert · 25.05.2026
 
 ### Kontext
 
@@ -239,3 +233,12 @@ Für jedes Image:
 - (+) Kein Root-Privilege im Container
 - (−) Mehrere Stages verlängern den Build um wenige Sekunden
 - (−) Alpine hat manchmal Probleme mit Native-Dependencies (für uns nicht relevant)
+
+---
+
+<div align="center">
+
+**Mehmet Ali Gür – HF Informatik**
+**Mai 2026**
+
+</div>

@@ -163,3 +163,12 @@ In DEV ist `minReplicas: 0` aktiviert → Scale-to-Zero → spart Kosten.
 - **Application Insights:** Auto-Instrumentation für HTTP-Calls
 - **Log Analytics Workspace:** Aggregiert Logs aller Container Apps
 - **Custom Metrics:** Cache-HIT/MISS-Rate (geplant für v2)
+
+---
+
+<div align="center">
+
+**Mehmet Ali Gür – HF Informatik**
+**Mai 2026**
+
+</div>

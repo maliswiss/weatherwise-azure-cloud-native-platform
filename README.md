@@ -1,8 +1,5 @@
 # WeatherWise – Cloud Deployment
 
-> **LB2 Vertiefungsprojekt – Modul Deployment**
-> HF Informatik · GIBB Bern · Mai 2026
-> Autor: Mehmet Ali Gür
 
 [![CI](https://github.com/maliswiss/weatherwise-azure-cloud-native-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/maliswiss/weatherwise-azure-cloud-native-platform/actions/workflows/ci.yml)
 [![Azure](https://img.shields.io/badge/Cloud-Azure-blue)](https://azure.microsoft.com/)
@@ -75,8 +72,8 @@ graph TB
 ### Datenfluss bei einer Wetter-Abfrage
 
 1. User tippt "Bern" und klickt **Suchen**
-2. Browser → `GET https://weatherwise-frontend-prod.azurecontainerapps.io`
-3. Frontend lädt → Ruft `GET https://weatherwise-backend-prod.../api/weather?city=Bern`
+2. Browser → `GET https://weatherwise-frontend-prod.bluegrass-76ceb786.switzerlandnorth.azurecontainerapps.io`
+3. Frontend lädt → Ruft `GET https://weatherwise-backend-prod.bluegrass-76ceb786.switzerlandnorth.azurecontainerapps.io/api/weather?city=Bern`
 4. Backend prüft Redis-Cache (`weather:city:bern:metric`)
    - **Cache-HIT** → Sofort Antwort
    - **Cache-MISS** → OpenWeatherMap-API, Antwort cachen, Antwort senden
@@ -184,7 +181,7 @@ docker compose down -v    # Auch Volumes löschen
 ```powershell
 # Azure CLI installieren: https://aka.ms/installazurecli
 az login
-az account set --subscription "Azure for Students"
+az account set --subscription "Azure subscription 1"
 
 # Initial-Setup durchführen (erstellt RGs, ACRs, Service Principal)
 .\scripts\azure-setup.ps1
@@ -201,8 +198,8 @@ Im GitHub-Repository → **Settings → Secrets and variables → Actions**:
 | `AZURE_CREDENTIALS` | JSON-Output aus `azure-setup.ps1` |
 | `OPENWEATHER_API_KEY_DEV` | Dein API-Key (Dev) |
 | `OPENWEATHER_API_KEY_PROD` | Dein API-Key (Prod) |
-| `DEV_BACKEND_URL` | (nach erstem Deploy: `https://weatherwise-backend-dev....azurecontainerapps.io`) |
-| `PROD_BACKEND_URL` | (nach erstem Deploy: `https://weatherwise-backend-prod....azurecontainerapps.io`) |
+| `DEV_BACKEND_URL` | `https://weatherwise-backend-dev.bluegrass-76ceb786.switzerlandnorth.azurecontainerapps.io` |
+| `PROD_BACKEND_URL` | `https://weatherwise-backend-prod.bluegrass-76ceb786.switzerlandnorth.azurecontainerapps.io` |
 
 ### Schritt 3: Branch-Strategie nutzen
 
@@ -239,8 +236,8 @@ feature/* ←  Feature-Branches (nur CI, kein Deployment)
 | Resource Group | `weatherwise-dev-rg` | `weatherwise-prod-rg` |
 | Container Registry | `weatherwiseacrdev` | `weatherwiseacrprod` |
 | Key Vault | `weatherwise-kv-dev-...` | `weatherwise-kv-prod-...` |
-| Backend URL | `weatherwise-backend-dev.../` | `weatherwise-backend-prod.../` |
-| Frontend URL | `weatherwise-frontend-dev.../` | `weatherwise-frontend-prod.../` |
+| Backend URL | `https://weatherwise-backend-dev.bluegrass-76ceb786.switzerlandnorth.azurecontainerapps.io` | `https://weatherwise-backend-prod.bluegrass-76ceb786.switzerlandnorth.azurecontainerapps.io` |
+| Frontend URL | `https://weatherwise-frontend-dev.bluegrass-76ceb786.switzerlandnorth.azurecontainerapps.io` | `https://weatherwise-frontend-prod.bluegrass-76ceb786.switzerlandnorth.azurecontainerapps.io` |
 | Min. Replicas | 0 (Scale-to-Zero) | 1 (immer warm) |
 | Max. Replicas | 2 | 3 |
 | Backend CPU | 0.5 vCPU | 0.5 vCPU |
@@ -259,7 +256,7 @@ landet er im Browser-Bundle und kann von jedem über DevTools eingesehen werden.
 **Lösung:** Eigenes Backend, das den API-Key serverseitig hält. Das Frontend
 spricht nur mit dem eigenen Backend, der API-Key verlässt nie die Server-Seite.
 
-**Bonus:** Caching reduziert OpenWeatherMap-Rate-Limit-Risiko und beschleunigt
+**Zusätzlicher Vorteil:** Caching reduziert OpenWeatherMap-Rate-Limit-Risiko und beschleunigt
 Antworten für wiederholte Abfragen.
 
 ### Warum Azure Container Apps (ACA) statt AKS?
@@ -268,7 +265,7 @@ Antworten für wiederholte Abfragen.
 |-----------|-----|-----|
 | Setup-Aufwand | gering | hoch |
 | Kontrolle | Mittel | Voll |
-| Kosten (Control Plane) | 0 €/Monat | ca. 70 €/Monat |
+| Kosten (Control Plane) | 0 CHF/Monat | ca. 70 CHF/Monat |
 | Komplexität | moderat | hoch |
 | Geeignet für | Single-Team-Projekte | Multi-Team-Enterprise |
 
@@ -295,30 +292,31 @@ ausschließlich Azure verwendet, ist Bicep die pragmatische Lösung.
 
 ## Learnings (Reflexion)
 
+In diesem Projekt habe ich versucht, technische Erfahrungen durch Analogien greifbar zu machen — weil manche Erkenntnisse sich besser erklären lassen, wenn man sie mit dem Alltag vergleicht.
+
 ### Was gut funktioniert hat
 
-- **Multi-Stage Dockerfile** reduziert Backend-Image von 950 MB auf 180 MB
-- **Non-Root User** wurde von Anfang an mit eingebaut, statt nachträglich
-- **Docker Compose** mit `depends_on: condition: service_healthy` verhindert
-  Race Conditions beim Start
+- **Multi-Stage Dockerfile** reduziert das Backend-Image von 950 MB auf 180 MB. Wie beim Umzug in eine neue Wohnung: nur mitnehmen, was wirklich gebraucht wird — der Rest bleibt zurück.
+- **Non-Root User** wurde von Anfang an eingebaut. Sicherheit nachträglich hinzuzufügen ist wie ein Schloss an einer bereits offenen Tür zu montieren — es funktioniert, aber der richtige Moment war früher.
+- **Docker Compose** mit `depends_on: condition: service_healthy` verhindert Race Conditions beim Start. Kein Service tritt auf die Bühne, bevor alle anderen bereit sind.
 
 ### Was rückblickend anders gemacht würde
 
-1. **Test-Setup früher**: Tests wurden erst spät hinzugefügt. Beim nächsten
-   Projekt würde ich mit einem Smoke-Test starten und parallel zur
-   Feature-Entwicklung Tests schreiben.
+1. **Tests früher schreiben**: Die ersten funktionierenden Container liefen ohne Tests. Ein einfacher Smoke-Test von Beginn an hätte spätere Fehler schneller sichtbar gemacht.
 
-2. **Application Insights früher integrieren**: Erst nach dem ersten
-   Deployment wurde Monitoring eingebaut. Frühe Integration hätte
-   beim Debugging der Container Apps geholfen.
+2. **Monitoring von Anfang an einplanen**: Application Insights und Log Analytics wurden per Bicep automatisch bereitgestellt — aber erst nach dem ersten Deployment aktiv genutzt. Frühere Integration hätte das Debugging der Container Apps deutlich beschleunigt.
 
-3. **Bicep What-If-Vorschau ernster nehmen**: Bei einem Deploy hat ein
-   Tippfehler in den Parametern zur Erstellung doppelter Ressourcen geführt.
-   `az deployment group what-if` würde ich jetzt vor jedem Deploy ausführen.
+3. **Frontend-Tests ergänzen**: Die Pipeline testet das Backend mit Pytest vollständig. Für das Frontend fehlen noch automatisierte Tests. Bei einem Folgeprojekt würde ich Playwright oder Vitest von Beginn an einbauen.
 
-4. **Frontend-Tests fehlen noch**: Die Pipeline testet aktuell nur das
-   Backend mit Pytest. Bei einem Folgeprojekt würde ich Playwright oder
-   Vitest für E2E-Tests einbauen.
+---
+
+## Dokumentation
+
+| Dokument | Inhalt |
+|----------|--------|
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Detaillierte Architektur, Diagramme, Healthcheck-Strategie |
+| [`docs/DECISIONS.md`](docs/DECISIONS.md) | Architecture Decision Records (ADRs) |
+| [`docs/RUNBOOK.md`](docs/RUNBOOK.md) | Operative Aufgaben, Troubleshooting, Kosten |
 
 ---
 
@@ -377,25 +375,8 @@ weatherwise-azure-cloud-native-platform/
 ├── .gitignore
 ├── start.ps1                         # Windows-Start
 ├── start.sh                          # Linux/Mac-Start
-└── README.md                         # ← Du bist hier
+└── README.md
 ```
-
----
-
-## Bewertungskriterien (LB2)
-
-| # | Kriterium | Lösung |
-|---|-----------|--------|
-| K1 | Containerisierung | Multi-Stage, Non-Root, Alpine, < 200 MB |
-| K2 | CI/CD-Pipeline | GitHub Actions: lint → test → scan → build → deploy |
-| K3 | Konfiguration und Secrets | Azure Key Vault + Managed Identity + Multi-Env |
-| K4 | Deployment-Ziel | Azure Container Apps, HTTPS, Healthchecks |
-| K5 | README | Dieses Dokument |
-| K6 | Screencast | Siehe Repo-Description |
-| K7 | Entscheidungen | siehe `docs/DECISIONS.md` |
-| K8 | Security | Non-Root + HTTPS + Trivy + Security-Headers |
-| K9 | Reproduzierbarkeit | `docker compose up` oder `.\start.ps1` |
-| K10 | Komplexität | Multi-Service, IaC, Monitoring, Multi-Env, E2E-Tests |
 
 ---
 
@@ -403,9 +384,16 @@ weatherwise-azure-cloud-native-platform/
 
 MIT License – Mehmet Ali Gür © 2026
 
+
+## Hinweis zum Einsatz von KI
+
+In diesem Projekt wurde bei der Erstellung der Dokumentation und einzelner Codeabschnitte teilweise KI  eingesetzt. Sämtliche generierten Inhalte wurden geprüft, angepasst und sind vom Autor inhaltlich nachvollziehbar.
+
 ---
 
-## Autor
+<div align="center">
 
-**Mehmet Ali Gür**
-HF Informatik · GIBB Bern · Mai 2026
+**Mehmet Ali Gür – HF Informatik**
+**Mai 2026**
+
+</div>
